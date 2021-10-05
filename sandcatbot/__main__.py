@@ -42,7 +42,7 @@ def main(config: Config, state_fname: str):
         access_token_secret =config.access_secret
     )
     with open(fname, "rb") as tweet_media:
-        tweet.PostUpdate(" ", media=tweet_media)
+        tweet.PostUpdate("", media=tweet_media)
 
     with open(state_fname, "w") as state_file:
         state_file.write(f"{call_count+1}\n")
