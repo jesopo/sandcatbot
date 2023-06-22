@@ -1,1 +1,1 @@
-python-twitter ~=3.5
+tweepy ~= 4.14.0

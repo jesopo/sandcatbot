@@ -4,8 +4,7 @@ from configparser import ConfigParser
 from dataclasses  import dataclass
 from datetime     import datetime
 from random       import Random
-
-from twitter      import Api
+import tweepy
 
 @dataclass
 class Config(object):
@@ -34,15 +33,25 @@ def main(config: Config, state_fname: str):
     index = call_count % len(files)
     fname = files[index]
 
-    _log(f"tweeting {fname}")
-    tweet = Api(
-        consumer_key        =config.consumer_key,
-        consumer_secret     =config.consumer_secret,
-        access_token_key    =config.access_key,
-        access_token_secret =config.access_secret
+    client_v1 = tweepy.API(tweepy.OAuth1UserHandler(
+        config.consumer_key,
+        config.consumer_secret,
+        config.access_key,
+        config.access_secret
+    ))
+    client_v2 = tweepy.Client(
+        consumer_key=config.consumer_key,
+        consumer_secret=config.consumer_secret,
+        access_token=config.access_key,
+        access_token_secret=config.access_secret
     )
+
+    _log("uploading media")
     with open(fname, "rb") as tweet_media:
-        tweet.PostUpdate("", media=tweet_media)
+        media = client_v1.media_upload(None, file=tweet_media)
+
+    _log(f"tweeting {media.media_id}")
+    client_v2.create_tweet(media_ids=[media.media_id])
 
     with open(state_fname, "w") as state_file:
         state_file.write(f"{call_count+1}\n")
